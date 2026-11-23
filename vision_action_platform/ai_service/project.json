@@ -1,0 +1,22 @@
+{
+  "description": "AI 추론 서버 설정. 6일차 RF(6개 Action), 7일차 창 준비 규칙(0.8·0.6·10), 8일차 ByteTrack. 창 길이·불확실 기준은 README 4장 참고.",
+  "pose_model": "models/yolo11n-pose.pt",
+  "rf_model": "models/rf_action_baseline.joblib",
+  "feature_columns": "models/rf_feature_columns.json",
+  "training_info": "models/rf_training_info.json",
+  "action_classes": "models/action_classes.csv",
+  "tracker": "bytetrack.yaml",
+  "image_size": 640,
+  "person_confidence": 0.25,
+  "device": "auto",
+  "max_process_fps": 30,
+  "window_seconds": 12.0,
+  "window_stride_seconds": 4.0,
+  "min_window_fill_ratio": 0.8,
+  "min_valid_feature_ratio": 0.6,
+  "min_valid_features": 10,
+  "min_track_seconds": 1.0,
+  "uncertain_below": 0.25,
+  "max_video_seconds": 60,
+  "max_upload_mb": 100
+}

@@ -1,0 +1,83 @@
+name: vision-action-platform
+# 서비스 5개: django · fastapi · celery · redis · postgres (교과10 기본 6개 Action 실습 버전)
+# 실행: cp .env.example .env (값 수정) → docker compose up -d --build
+# 서비스끼리는 localhost 가 아니라 서비스 이름(postgres, redis, fastapi)으로 부른다.
+
+x-backend-env: &backend-env
+  DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:?set DJANGO_SECRET_KEY in .env}
+  DJANGO_DEBUG: ${DJANGO_DEBUG:-0}
+  DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}
+  DJANGO_CSRF_TRUSTED_ORIGINS: ${DJANGO_CSRF_TRUSTED_ORIGINS:-http://localhost:8100,http://127.0.0.1:8100}
+  POSTGRES_HOST: postgres
+  POSTGRES_DB: ${POSTGRES_DB:-vision_action}
+  POSTGRES_USER: ${POSTGRES_USER:-vision_action}
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+  CELERY_BROKER_URL: redis://redis:6379/0
+  CELERY_RESULT_BACKEND: redis://redis:6379/1
+  FASTAPI_URL: http://fastapi:8001
+  MEDIA_ROOT: /app/media
+  IPWEBCAM_CAMERAS: ${IPWEBCAM_CAMERAS:-}
+  CAPTURE_SECONDS: ${CAPTURE_SECONDS:-8}
+  MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-100}
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-vision_action}
+      POSTGRES_USER: ${POSTGRES_USER:-vision_action}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data          # 컨테이너를 지워도 DB 는 남는다
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      retries: 10
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      retries: 10
+    restart: unless-stopped
+
+  fastapi:
+    build: ./ai_service
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,json,sys; sys.exit(0 if json.load(urllib.request.urlopen('http://localhost:8001/health'))['status']=='ok' else 1)"]
+      interval: 10s
+      start_period: 40s
+      retries: 10
+    ports:
+      - "127.0.0.1:8101:8001"                    # 개발용 /docs 확인. 이 컴퓨터에서만 열림
+    restart: unless-stopped
+
+  django:
+    build: ./backend
+    environment: *backend-env
+    volumes:
+      - media:/app/media
+    ports:
+      - "8100:8000"                              # 우리 데이터 버전(store-anomaly-service, :8000)과 같이 띄울 수 있게
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    restart: unless-stopped
+
+  celery:
+    build: ./backend
+    command: celery -A config worker -l info --concurrency 2
+    environment: *backend-env
+    volumes:
+      - media:/app/media                         # Django 가 저장한 업로드 영상을 같은 경로로 읽는다
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      fastapi: { condition: service_healthy }
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  media:

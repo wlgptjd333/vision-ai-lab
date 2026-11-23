@@ -348,3 +348,12 @@ python scripts/40_evaluate_test.py          # Test 는 마지막에 한 번
 ### 다음 수업
 
 7일차에는 실시간 Frame 을 모아 Sliding Window 를 만들고 실시간 Action Recognition 으로 연결한다.
+
+## 최종 프로젝트 실습 - Vision Action Platform
+
+6일차 모델(6개 Action)을 Django·DRF·Celery·FastAPI·PostgreSQL·Docker Compose 웹 서비스로 연결한 실습 버전입니다.
+→ [vision_action_platform/README.md](vision_action_platform/README.md)
+
+- 영상 업로드 / IP Webcam → 사람(Track ID)별 동작·Confidence → DB 저장 → 관리자 대시보드
+- Test S03 6개 모두 일치. Confidence 가 6일차 오프라인 평가와 같아서 학습과 같은 계산임을 확인
+- 같은 서비스를 3팀 촬영 데이터(17개 동작)로 바꾼 버전: [store-anomaly-service](https://github.com/wlgptjd333/store-anomaly-service)

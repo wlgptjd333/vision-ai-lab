@@ -1,0 +1,11 @@
+# 6일차 모델을 학습한 환경(subject10_pose_action .venv)과 같은 버전: Joblib 을 만든 scikit-learn·numpy 와 맞춘다
+scikit-learn==1.9.1
+numpy==2.5.4
+pandas==3.1.1
+joblib==1.6.0
+ultralytics==8.4.203
+opencv-python-headless>=4.10
+lap>=0.5.12
+fastapi>=0.115
+uvicorn[standard]>=0.30
+python-multipart>=0.0.9

@@ -1,0 +1,27 @@
+# 비밀값
+.env
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Django 실행 중 생기는 것
+backend/db.sqlite3
+backend/media/
+backend/staticfiles/
+
+# 영상·사진 (얼굴이 나올 수 있음) — README 그림은 docs/images 에서 골라서만
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.webm
+*.jpg
+*.jpeg
+*.png
+!docs/images/*.png
+
+# Pose 가중치는 Docker 이미지 만들 때 받는다 (Ultralytics 배포 파일)
+*.pt
