@@ -1,0 +1,14 @@
+{% extends "polls/base.html" %}
+{% block title %}결과{% endblock %}
+
+{# 교재 Part3 에는 results.html 내용이 없어서, views.results 가 열리도록 detail 과 같은 모양으로 만듦 #}
+{% block content %}
+<div class="detail-container">
+  <h2 class="question-title">{{ question.question_text }}</h2>
+  <ul class="choice-list">
+    {% for choice in question.choice_set.all %}
+      <li>{{ choice.choice_text }} -- {{ choice.votes }}표</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}
