@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}AI 분석{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>AI 동작 분석</h1>
+  <p class="muted">교과10 기본 6개 동작(A001~A006) 중 가장 가까운 동작을 사람별로 예측합니다. 6일차 모델(S01 6개 Clip으로 학습)을 그대로 쓰는 실습 버전입니다.</p>
+
+  <div class="tabs" role="tablist">
+    <button type="button" class="tab active" data-input="UPLOAD" role="tab">영상 업로드</button>
+    <button type="button" class="tab" data-input="IPWEBCAM" role="tab">IP Webcam</button>
+  </div>
+
+  <form id="analysis-form">
+    <div class="pane" data-pane="UPLOAD">
+      <label>영상 파일 (MP4 등, {{ max_upload_mb }} MB 이하)
+        <input type="file" name="video" accept="video/*">
+      </label>
+    </div>
+    <div class="pane hidden" data-pane="IPWEBCAM">
+      {% if cameras %}
+        <label>카메라
+          <select name="camera_name">{% for c in cameras %}<option value="{{ c }}">{{ c }}</option>{% endfor %}</select>
+        </label>
+        <p class="muted">시작을 누르면 서버가 카메라에서 {{ capture_seconds|floatformat:0 }}초 동안 화면을 받아 분석합니다. 그동안 카메라 앞에서 동작하세요.</p>
+      {% else %}
+        <p class="error">허용된 카메라가 없습니다. 관리자가 .env 의 IPWEBCAM_CAMERAS 를 설정해야 합니다.</p>
+      {% endif %}
+    </div>
+
+    <div class="row">
+      <label>수행한 동작 (선택, 정답 검증용 아님)
+        <select name="expected_action">
+          <option value="">선택 안 함</option>
+          {% for a in actions %}<option value="{{ a.0 }}">{{ a.0 }} {{ a.2 }}</option>{% endfor %}
+        </select>
+      </label>
+      <label>제목 (선택) <input type="text" name="title" maxlength="100"></label>
+    </div>
+    <button id="start-btn" class="primary" type="submit">AI 분석 시작</button>
+    <p id="form-error" class="error" hidden></p>
+  </form>
+</section>
+
+<section class="card" id="current" hidden>
+  <h2>현재 작업 <span id="current-id"></span></h2>
+  <ol class="steps" id="status-steps">
+    <li data-step="PENDING">대기</li><li data-step="STARTED">처리 중</li><li data-step="DONE">완료 / 실패</li>
+  </ol>
+  <p id="current-message" class="muted"></p>
+  <div id="current-result"></div>
+</section>
+
+<section class="card">
+  <h2>최근 분석 이력</h2>
+  <table class="table" id="history">
+    <thead><tr><th>#</th><th>입력</th><th>수행한 동작</th><th>예측 (사람별)</th><th>상태</th><th>처리 시간</th><th>요청 시각</th></tr></thead>
+    <tbody><tr><td colspan="7" class="muted">불러오는 중…</td></tr></tbody>
+  </table>
+</section>
+
+{{ uncertain_below|json_script:"uncertain-below" }}
+{% endblock %}
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/axios@1.7.7/dist/axios.min.js"></script>
+<script src="{% static 'js/analyses.js' %}"></script>
+{% endblock %}

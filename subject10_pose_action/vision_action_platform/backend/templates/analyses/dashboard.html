@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}관리자 대시보드{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>관리자 대시보드</h1>
+  <p class="muted">PostgreSQL 에 저장된 결과를 Django ORM 으로 집계했습니다. AI 서버 상태:
+    <span class="badge {% if ai_health.status == 'ok' %}ok{% else %}bad{% endif %}">{{ ai_health.status }}</span></p>
+  <div class="kpis">
+    <div class="kpi"><span>분석 작업</span><strong>{{ summary.jobs }}</strong></div>
+    <div class="kpi"><span>요청한 회원</span><strong>{{ summary.users }}</strong></div>
+    <div class="kpi"><span>사람별 예측</span><strong>{{ summary.predictions }}</strong></div>
+    <div class="kpi"><span>판단 불확실</span><strong>{{ summary.uncertain }}</strong></div>
+  </div>
+</section>
+
+<div class="grid2">
+  <section class="card">
+    <h2>동작별 예측 건수</h2>
+    <div class="chart-box tall"><canvas id="actionChart" aria-label="6개 동작별 예측 건수 막대그래프"></canvas></div>
+  </section>
+  <section class="card">
+    <h2>작업 상태별 건수</h2>
+    <div class="chart-box"><canvas id="statusChart" aria-label="작업 상태별 건수 원형 그래프"></canvas></div>
+    <h2>입력 방식별 건수 · 평균 처리 시간</h2>
+    <div class="chart-box"><canvas id="inputChart" aria-label="입력 방식별 건수와 평균 처리 시간"></canvas></div>
+  </section>
+</div>
+
+<section class="card">
+  <h2>최근 작업 10개 (전체 회원)</h2>
+  <table class="table">
+    <thead><tr><th>#</th><th>회원</th><th>입력</th><th>상태</th><th>예측</th><th>요청 시각</th></tr></thead>
+    <tbody>
+    {% for j in recent %}
+      <tr><td><a href="{% url 'admin:analyses_analysisjob_change' j.pk %}">{{ j.pk }}</a></td><td>{{ j.user.username }}</td>
+        <td class="nowrap">{{ j.get_input_type_display }}</td><td><span class="badge s-{{ j.status }}">{{ j.get_status_display }}</span></td>
+        <td>{% for p in j.predictions.all %}#{{ p.track_id }} {{ p.action_id }} {{ p.confidence|floatformat:2 }}{% if not forloop.last %}, {% endif %}{% empty %}-{% endfor %}</td>
+        <td>{{ j.created_at|date:"m-d H:i" }}</td></tr>
+    {% empty %}<tr><td colspan="6" class="muted">아직 작업이 없습니다.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</section>
+{{ chart_data|json_script:"chart-data" }}
+{% endblock %}
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="{% static 'js/dashboard.js' %}"></script>
+{% endblock %}

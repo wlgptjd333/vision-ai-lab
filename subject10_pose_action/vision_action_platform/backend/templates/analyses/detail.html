@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}분석 #{{ job.pk }}{% endblock %}
+{% block content %}
+<section class="card" id="detail" data-job-id="{{ job.pk }}">
+  <p><a href="{% url 'analyses:index' %}">← 분석 화면</a></p>
+  <h1>분석 #{{ job.pk }} <span class="badge" id="detail-status"></span></h1>
+  <dl class="meta" id="detail-meta"></dl>
+  <div id="detail-result"></div>
+</section>
+
+<section class="card">
+  <h2>제목·메모 수정</h2>
+  <p class="muted">상태와 AI 예측값은 바꿀 수 없습니다.</p>
+  <form id="edit-form">
+    <label>제목 <input type="text" name="title" maxlength="100" value="{{ job.title }}"></label>
+    <label>메모 <textarea name="memo" rows="3">{{ job.memo }}</textarea></label>
+    <button class="primary" type="submit">저장</button>
+    <button class="danger" type="button" id="delete-btn">이 기록 삭제</button>
+    <span id="edit-message" class="muted"></span>
+  </form>
+</section>
+{{ uncertain_below|json_script:"uncertain-below" }}
+{% endblock %}
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/axios@1.7.7/dist/axios.min.js"></script>
+<script src="{% static 'js/analyses.js' %}"></script>
+{% endblock %}
