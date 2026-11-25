@@ -79,7 +79,7 @@ Pipeline 을 배우기에는 적절하지만 일반화 성능을 판단하기에
 ## 10. Mini Challenge
 
 교재의 5일차 Mini Challenge(팀 영상으로 같은 흐름)는 3팀 저장소에서 170개 영상으로 수행했습니다.
-→ [unmanned-store-anomaly](https://github.com/wlgptjd333/unmanned-store-anomaly) (동작별 관절 QA, Human QA PASS 170, Train S01~S03 / Val S04 / Test S05, Leakage 검사 통과)
+→ [store-anomaly-service/training](https://github.com/wlgptjd333/store-anomaly-service/tree/main/training) (동작별 관절 QA, Human QA PASS 170, Train S01~S03 / Val S04 / Test S05, Leakage 검사 통과)
 
 ## 11. 오늘의 핵심
 
